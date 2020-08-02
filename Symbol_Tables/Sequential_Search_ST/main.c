@@ -5,13 +5,11 @@
 
 // a helper linked list data type
 typedef struct Node {
-    struct Node* head;
-    struct Node* curr;
-    char key;
+    int key;
     int val;
+    struct Node* head;
     struct Node* next;
-} Node;
-
+} ListNode;
 
 // helper QueueNode linked list (implementation) class
 struct QueueNode {
@@ -22,15 +20,18 @@ struct QueueNode {
     struct QueueNode *next;
 } QueueNode;
 
-int n;           // number of key-value pairs
-Node* first;     // the linked list of key-value pairs
+int n;              // number of key-value pairs
+ListNode* head;     // the linked list of key-value pairs
 
-void createNode(char key, int val, Node* next)  {
-        first->key  = key;
-        first->val  = val;
-        first->next = next;
+ListNode* createNode(int key, int val, ListNode* next)  {
+        ListNode* temp = (struct Node*)malloc(sizeof(struct Node));
+        temp->key  = key;
+        temp->val  = val;
+        temp->next = next;
+        return temp;
 }
-/**
+
+/*
  * Returns the number of key-value pairs in this symbol table.
  *
  * @return the number of key-value pairs in this symbol table
@@ -38,6 +39,7 @@ void createNode(char key, int val, Node* next)  {
 int size() {
     return n;
 }
+
 
 /**
  * Returns true if this symbol table is empty.
@@ -58,16 +60,17 @@ bool isEmpty(struct QueueNode* st) {
  *     and {@code null} if the key is not in the symbol table
  * @throws IllegalArgumentException if {@code key} is {@code null}
  */
-int get(char cKey) {
+int get(ListNode* temp, int cKey) {
+    ListNode* runner;
     if (cKey == '\0') {
         printf("argument to get() is null");
         return 0;
     }
-    for (Node* x = first; x != NULL; x = x->next) {
-        if (cKey == x->key) {
-            return x->val;
+    
+    for (ListNode* runner = temp->head; runner != NULL; runner = runner->next) {
+        if (cKey == runner->key) {
+            return runner->val;
         }
-        return 0;
     }
     return 0;
 }
@@ -81,19 +84,18 @@ int get(char cKey) {
  *         {@code false} otherwise
  * @throws IllegalArgumentException if {@code key} is {@code null}
  */
-bool contains(char key) {
+bool contains(ListNode* temp, int key) {
     if (key == '\0') {
         printf("argument to contains() is null");
         return false;
     }
-    return get(key) != NULL;
+    return get(temp, key) != '\0';
 }
-
 
 
 // delete key in linked list beginning at Node x
 // warning: function call stack too large if table is large
-Node* deleteKey(Node* x, char key) {
+ListNode* deleteKey(ListNode* x, int key) {
     if (x == NULL) {
         return NULL;
     }
@@ -113,12 +115,12 @@ Node* deleteKey(Node* x, char key) {
  * @param  key the key
  * @throws IllegalArgumentException if {@code key} is {@code null}
  */
-void delete(char key) {
+void delete(ListNode* x, int key) {
     if (key == '\0') {
         printf("argument to delete() is null");
         return;
     } 
-    first = deleteKey(first, key);
+    x->head = deleteKey(x->head, key);
 }
 
 
@@ -133,29 +135,25 @@ void delete(char key) {
  * @param  val the value
  * @throws IllegalArgumentException if {@code key} is {@code null}
  */
-void put(char key, int val) {
-    printf("%d", valf);
-    printf("yoooo");
-    printf("hi");
+void put(ListNode* temp, int key, int val) {
+    ListNode* runner;
     
     if (key == '\0') {
         printf("first argument to put() is null"); 
         return;
     }
-    if (val == NULL) {
-        printf("fdnfbsd");
-        delete(key);
+    if (val < 0) {
+        delete(temp, key);
         return;
     }
 
-    for (Node* x = first; x != NULL; x = x->next) {
-        if (key == (x->key)) {
-            x->val = val;
+    for (ListNode* runner = temp->head; runner != NULL; runner = runner->next) {
+        if (key == (runner->key)) {
+            runner->val = val;
             return;
         }
     }
-    // first = (Node*)malloc(sizeof(Node));
-    createNode(key, val, first);
+    temp->head = createNode(key, val, temp->head);
     n++;
 }
 
@@ -186,6 +184,7 @@ void enqueue(struct QueueNode* st, int correctNum) {
     st->length++;
 }
 
+
 /**
  * Returns all keys in the symbol table as an {@code Iterable}.
  * To iterate over all of the keys in the symbol table named {@code st},
@@ -193,10 +192,10 @@ void enqueue(struct QueueNode* st, int correctNum) {
  *
  * @return all keys in the symbol table
  */
- struct QueueNode* keys()  {
+ struct QueueNode* keys(ListNode* temp)  {
     struct QueueNode* queueMain = (struct QueueNode*)malloc(sizeof(QueueNode));
     // Queue<int> queue = new Queue<int>();
-    for (Node* x = first; x != NULL; x = x->next) {
+    for (ListNode* x = temp->head; x != NULL; x = x->next) {
         enqueue(queueMain, x->key);
     }
     return queueMain;
@@ -210,33 +209,20 @@ void enqueue(struct QueueNode* st, int correctNum) {
  */
 int main() {
     int p, count, range;
-    printf("Please enter a valid range of chars you want to include!\n");
-    scanf("%d\n", &count);
-    struct Node* searchMain = (struct Node*)malloc(sizeof(Node));
+    ListNode* searchMain = (struct Node*)malloc(sizeof(struct Node));
+    printf("Please enter a valid range of integers you want to include!");
+    printf("\n");
+    scanf("%d", &count);
+    printf("Now enter these integers each seperated by a space!");
+    printf("\n");
     for (int i = 0; i < count; i++) {
-        // printf("yoer");
         p = i;
-        scanf("%c ", &searchMain->head->key);
-        printf("%d", p);
-        printf("%c", searchMain->head->key);
-        printf("yoer\n");
-       
-        printf("%s %d", searchMain->key, i);
-        put(searchMain->key, p);
+        scanf("%d", &searchMain->key);
+        put(searchMain, searchMain->key, p);
     }
 
-    for (Node* s = searchMain->head; s != NULL; s = s->next) {
-        printf("%c %d", s, get(s));
+    for (ListNode* s = searchMain->head; s != NULL; s = s->next) {
+        printf("%d %d\n", s->key, s->val);
     }
     return 0;
 }
-#if 0
-    SequentialSearchST<String, Integer> st = new SequentialSearchST<String, Integer>();
-    for (int i = 0; !StdIn.isEmpty(); i++) {
-            String key = StdIn.readString();
-            st.put(key, i);
-        }
-        for (String s : st.keys())
-            StdOut.println(s + " " + st.get(s));
-    }
-#endif
